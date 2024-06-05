@@ -301,7 +301,7 @@
 
         // ФУНКЦИИ: проверка локального хранилища на токен и действующую сессию. Получение пользовательских данных и заполнение меню и виджетов
         
-        const setupAccount = async () => {
+        const checkUserData = async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
         
             if (user) {
@@ -324,6 +324,8 @@
             } else {
                 window.location.href = 'space.synask.ru/login';
             }
+        };
+        checkUserData();
 
         // ФУНКЦИИ: отображение контента страниц во фрейме
         function loadContent(url) {
