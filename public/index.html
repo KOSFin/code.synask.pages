@@ -192,8 +192,8 @@
     <div class="sidebar">
         <div class="sidebar-content">
             <a href="#" class="profile-button" onclick="loadContent('/profile')">
-                <img src="https://cnicyffiqvdhgyzkogtl.supabase.co/storage/v1/object/public/Avatars%20and%20Covers/fenix-default-avatar-white-bkgd.png" alt="Avatar" class="avatar">
-                <span class="profile-name">Имя Фамилия</span>
+                <img src="https://cnicyffiqvdhgyzkogtl.supabase.co/storage/v1/object/public/Avatars%20and%20Covers/fenix-default-avatar-white-bkgd.png" alt="Avatar" class="avatar" id="avatar">
+                <span id="profile-name" class="profile-name">Имя Фамилия</span>
             </a>
             <a href="#" class="sidebar-button" onclick="loadContent('/welcome')">
                 <i class="fas fa-home"></i>
@@ -299,6 +299,31 @@
         const { createClient } = supabase;
         const supabaseClient = createClient('https://cnicyffiqvdhgyzkogtl.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNuaWN5ZmZpcXZkaGd5emtvZ3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDc3NDM2NzcsImV4cCI6MjAyMzMxOTY3N30.bZoapdV-TJiq42uJaOPGBfPz91ULReQ1_ahXpUHNaJ8');
 
+        // ФУНКЦИИ: проверка локального хранилища на токен и действующую сессию. Получение пользовательских данных и заполнение меню и виджетов
+        
+        const setupAccount = async () => {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+        
+            if (user) {
+                // Public information
+                const { data, error } = await supabaseClient
+                  .from('users_public_information')
+                  .select('username, first_name, last_name, avatar_url')
+                  .eq('auth_id', user.user.id)
+                  .single();
+
+                if (error) {
+                    window.location.href = 'space.synask.ru/login';
+                }
+
+                const avatar = document.getElementById('avatar');
+                const profileName = document.getElementById('profile-name');
+
+                avatar.src = data.avatar_url;
+                profileName.textContent = `${data.first_name} ${data.last_name}`;
+            } else {
+                window.location.href = 'space.synask.ru/login';
+            }
 
         // ФУНКЦИИ: отображение контента страниц во фрейме
         function loadContent(url) {
