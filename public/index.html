@@ -143,12 +143,6 @@
         p {
             color: #666666;
         }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
     </style>
 </head>
 <body>
@@ -180,34 +174,40 @@
             </a>
         </div>
     </div>
-    <div class="content">
-        <iframe id="content-frame" src="https://space.synask.ru/welcome"></iframe>
+    <div class="content" id="content">
+        <h1>Welcome to the social network!</h1>
+        <p>This is the home page.</p>
     </div>
     <audio id="background-music" loop autoplay>
         <source src="path-to-your-music-file.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
     <script>
-        function loadContent(url) {
-            var iframe = document.getElementById('content-frame');
-            iframe.src = `https://space.synask.ru${url}`;
+        function loadContent(page) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', `https://space.synask.ru${page}`, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    document.getElementById('content').innerHTML = xhr.responseText;
+                }
+            };
+            xhr.send();
         }
 
-        window.addEventListener('message', function(event) {
-            if (event.origin !== 'https://space.synask.ru') {
-                return;
-            }
-
-            var data = event.data;
-            if (data.action === 'navigate') {
-                loadContent(data.url);
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.page) {
+                loadContent(event.state.page);
             }
         });
 
-        function sendMessageToIframe(message) {
-            var iframe = document.getElementById('content-frame');
-            iframe.contentWindow.postMessage(message, 'https://space.synask.ru');
-        }
+        document.querySelectorAll('.sidebar-button, .profile-button').forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                var page = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+                loadContent(page);
+                history.pushState({ page: page }, '', page);
+            });
+        });
     </script>
 </body>
 </html>
