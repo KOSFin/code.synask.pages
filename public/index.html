@@ -145,9 +145,45 @@
         }
 
         iframe {
+            width: 200%;
+            height: 120%;
+            border: none;
+        }
+
+        /* Стили загрузки */
+        .loader-background {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            border: none;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9;
+        }
+
+        .loader {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+        }
+
+        .loader .spinner {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #ff7f00;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -183,11 +219,65 @@
     <div class="content">
         <iframe id="content-frame" src="https://space.synask.ru/welcome"></iframe>
     </div>
-    <audio id="background-music" loop autoplay>
-        <source src="path-to-your-music-file.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+
     <script>
+        // ФУНКЦИИ: уведомления, загрузка
+
+        // ПОКАЗЫВАЕТ УВЕДОМЛЕНИЕ С ТЕКСТОМ И КАРТИНКОЙ
+        let currentPopup = null;
+
+        function showPopupWithImageAndText(message, imagePath, displayTime) {
+            if (currentPopup) {
+                currentPopup.remove();
+            }
+
+            const popupContainer = document.createElement('div');
+            popupContainer.className = 'popup-container';
+
+            const popupContent = document.createElement('div');
+            popupContent.className = 'popup-content';
+
+            const popupImage = document.createElement('img');
+            popupImage.src = imagePath;
+            popupImage.alt = 'Изображение';
+            popupImage.className = 'popup-image';
+
+            const popupText = document.createElement('span');
+            popupText.className = 'popup-text';
+            popupText.textContent = message;
+
+            popupContent.appendChild(popupImage);
+            popupContent.appendChild(popupText);
+
+            popupContainer.appendChild(popupContent);
+            document.body.appendChild(popupContainer);
+
+            setTimeout(() => {
+                popupContainer.style.top = '50px';
+                popupContainer.style.opacity = '1';
+            }, 500);
+
+            setTimeout(() => {
+                popupContainer.style.top = '-100px';
+                popupContainer.style.opacity = '0';
+            }, displayTime);
+
+            currentPopup = popupContainer;
+        }
+
+        // ФУНКЦИИ ВИЗУАЛЬНОЙ АНИМАЦИИ ЗАГРУЗКИ
+        function showLoader() {
+            document.getElementById('loader-background').style.display = 'block';
+            document.getElementById('loader').style.display = 'block';
+        }
+
+        function hideLoader() {
+            document.getElementById('loader-background').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        // ФУНКЦИИ: отображение контента страниц во фрейме
+
         function loadContent(url) {
             var iframe = document.getElementById('content-frame');
             iframe.src = `https://space.synask.ru${url}`;
@@ -209,6 +299,8 @@
             iframe.contentWindow.postMessage(message, 'https://space.synask.ru');
         }
 
+        // ФУНКЦИИ: функционирование бокового меню (сайд-бара), вызов загрузки и изменения фрейма
+
         document.querySelectorAll('.sidebar-button, .profile-button').forEach(function(button) {
             button.addEventListener('click', function(event) {
                 event.preventDefault();
@@ -223,6 +315,15 @@
                 loadContent(event.state.page);
             }
         });
+
+        // ФУНКЦИИ: получение переменной из url от страницы 404 и отображение нужной страницы
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const PageFromUrl = urlParams.get('pg');
+
+        if (PageFromUrl) {
+            loadContent(`/${PageFromUrl}`);
+        }
     </script>
 </body>
 </html>
