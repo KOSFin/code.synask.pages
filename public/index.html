@@ -224,6 +224,23 @@
     <script>
         // ФУНКЦИИ: уведомления, загрузка
 
+        // ФУНКЦИИ: принятие данных о сессии пользователя от space.synask
+
+        window.addEventListener('message', function(event) {
+            // Убедитесь, что сообщение приходит от правильного источника
+            if (event.origin === 'https://space.synask.ru') {
+                // Получите данные из сообщения
+                const data = event.data;
+                if (data.type === 'localStorageData') {
+                    // Сохраните полученные данные в localStorage текущего домена
+                    for (const key in data.payload) {
+                        localStorage.setItem(key, data.payload[key]);
+                    }
+                    console.log('LocalStorage data copied from space.synask.ru to me.synask.ru');
+                }
+            }
+        }, false);
+
         // ПОКАЗЫВАЕТ УВЕДОМЛЕНИЕ С ТЕКСТОМ И КАРТИНКОЙ
         let currentPopup = null;
 
