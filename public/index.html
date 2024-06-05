@@ -198,7 +198,7 @@
                 <i class="fas fa-home"></i>
                 <span>Главная</span>
             </a>
-            <a href="#" class="sidebar-button active" onclick="loadContent('/messenger')">
+            <a href="#" class="sidebar-button" onclick="loadContent('/messenger')">
                 <i class="fas fa-comment"></i>
                 <span>Мессенджер</span>
             </a>
@@ -277,10 +277,20 @@
         }
 
         // ФУНКЦИИ: отображение контента страниц во фрейме
-
         function loadContent(url) {
             var iframe = document.getElementById('content-frame');
             iframe.src = `https://space.synask.ru${url}`;
+            updateActiveLink(url);
+        }
+
+        function updateActiveLink(url) {
+            document.querySelectorAll('.sidebar-button, .profile-button').forEach(function(button) {
+                button.classList.remove('active');
+                var page = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+                if (url === page) {
+                    button.classList.add('active');
+                }
+            });
         }
 
         window.addEventListener('message', function(event) {
@@ -324,7 +334,12 @@
         if (PageFromUrl) {
             loadContent(`/${PageFromUrl}`);
             history.pushState({ page: PageFromUrl }, '', PageFromUrl);
+        } else {
+            updateActiveLink(window.location.pathname);
         }
+
+        // Инициализация активного элемента при загрузке
+        updateActiveLink(window.location.pathname);
     </script>
 </body>
 </html>
