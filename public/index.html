@@ -309,7 +309,7 @@
                 const { data, error } = await supabaseClient
                   .from('users_public_information')
                   .select('username, first_name, last_name, avatar_url')
-                  .eq('auth_id', user.user.id)
+                  .eq('auth_id', user.id)
                   .single();
 
                 if (error) {
