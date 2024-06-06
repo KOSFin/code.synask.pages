@@ -308,8 +308,6 @@
             updateActiveLink(url);
         }
 
-        loadContent('/session-synchronization')
-
         // ФУНКЦИИ: принятие данных о сессии пользователя от space.synask
 
         window.addEventListener('message', function(event) {
@@ -327,6 +325,8 @@
                 }
             }
         }, false);
+
+        loadContent('/session-synchronization')
 
         // ФУНКЦИИ: supabase
 
