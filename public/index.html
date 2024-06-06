@@ -146,8 +146,8 @@
         }
 
         iframe {
-            width: 200%;
-            height: 120%;
+            width: 100%;
+            height: 100%;
             border: none;
         }
 
@@ -221,27 +221,16 @@
         <iframe id="content-frame" src="https://space.synask.ru/welcome"></iframe>
     </div>
 
+    <!-- Элементы для загрузки -->
+    <div class="loader-background" id="loader-background"></div>
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
     <script>
         // ФУНКЦИИ: уведомления, загрузка
 
-        // ФУНКЦИИ: принятие данных о сессии пользователя от space.synask
-
-        window.addEventListener('message', function(event) {
-            // Убедитесь, что сообщение приходит от правильного источника
-            if (event.origin === 'https://space.synask.ru') {
-                // Получите данные из сообщения
-                const data = event.data;
-                if (data.type === 'localStorageData') {
-                    // Сохраните полученные данные в localStorage текущего домена
-                    for (const key in data.payload) {
-                        localStorage.setItem(key, data.payload[key]);
-                    }
-                    console.log('LocalStorage data copied from space.synask.ru to me.synask.ru');
-                }
-            }
-        }, false);
-
-        // ПОКАЗЫВАЕТ УВЕДОМЛЕНИЕ С ТЕКСТОМ И КАРТИНКОЙ
+                // ПОКАЗЫВАЕТ УВЕДОМЛЕНИЕ С ТЕКСТОМ И КАРТИНКОЙ
         let currentPopup = null;
 
         function showPopupWithImageAndText(message, imagePath, displayTime) {
@@ -294,6 +283,50 @@
             document.getElementById('loader').style.display = 'none';
         }
 
+        showLoader();
+
+        // ОБРАБОТЧИК: обработчик для iframe
+        document.getElementById('content-frame').addEventListener('load', function() {
+            var iframe = document.getElementById('content-frame');
+            var iframeWindow = iframe.contentWindow;
+            
+            if (iframeWindow.location.href === 'https://space.synask.ru/login') {
+                showLoader();
+                document.querySelector('.content').style.display = 'none';
+                
+                setTimeout(() => {
+                    localStorage.clear();
+                    window.location.href = 'https://space.synask.ru/login';
+                }, 2000);
+            }
+        });
+
+        // ФУНКЦИИ: отображение контента страниц во фрейме
+        function loadContent(url) {
+            var iframe = document.getElementById('content-frame');
+            iframe.src = `https://space.synask.ru${url}`;
+            updateActiveLink(url);
+        }
+
+        loadContent('/session-synchronization')
+
+        // ФУНКЦИИ: принятие данных о сессии пользователя от space.synask
+
+        window.addEventListener('message', function(event) {
+            // Убедитесь, что сообщение приходит от правильного источника
+            if (event.origin === 'https://space.synask.ru') {
+                // Получите данные из сообщения
+                const data = event.data;
+                if (data.type === 'localStorageData') {
+                    // Сохраните полученные данные в localStorage текущего домена
+                    for (const key in data.payload) {
+                        localStorage.setItem(key, data.payload[key]);
+                    }
+                    console.log('LocalStorage data copied from space.synask.ru to me.synask.ru');
+                }
+            }
+        }, false);
+
         // ФУНКЦИИ: supabase
 
         const { createClient } = supabase;
@@ -313,7 +346,7 @@
                   .single();
 
                 if (error) {
-                    window.location.href = 'space.synask.ru/login';
+                    window.location.href = 'https://space.synask.ru/login';
                 }
 
                 const avatar = document.getElementById('avatar');
@@ -322,17 +355,10 @@
                 avatar.src = data.avatar_url;
                 profileName.textContent = `${data.first_name} ${data.last_name}`;
             } else {
-                window.location.href = 'space.synask.ru/login';
+                window.location.href = 'https://space.synask.ru/login';
             }
         };
         checkUserData();
-
-        // ФУНКЦИИ: отображение контента страниц во фрейме
-        function loadContent(url) {
-            var iframe = document.getElementById('content-frame');
-            iframe.src = `https://space.synask.ru${url}`;
-            updateActiveLink(url);
-        }
 
         function updateActiveLink(url) {
             document.querySelectorAll('.sidebar-button, .profile-button').forEach(function(button) {
@@ -391,7 +417,7 @@
 
         // Инициализация активного элемента при загрузке
         updateActiveLink(window.location.pathname);
+
     </script>
 </body>
 </html>
-
